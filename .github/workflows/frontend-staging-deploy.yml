@@ -2,10 +2,10 @@ name: Trigger staging deploy of frontend application on push to master
 
 on:
   push:
-    branches:
-      - master
-    paths:
-      - "web/**"
+    #branches:
+      #- master
+    #paths:
+      #- "web/**"
 
 jobs:
   deploy:
@@ -19,3 +19,5 @@ jobs:
           NETLIFY_SITE_ID: ${{secrets.NETLIFY_STAGING_SITE_ID}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           NETLIFY_BASE: web
+          NETLIFY_CMD: yarn run build
+          NETLIFY_DIR: web/dist
