@@ -224,8 +224,8 @@ class DandisetViewSet(ReadOnlyModelViewSet):
     )
     def create(self, request: Request):
         """Create a new dandiset."""
-        serializer = VersionMetadataSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        req_serializer = VersionMetadataSerializer(data=request.data)
+        req_serializer.is_valid(raise_exception=True)
 
         query_serializer = CreateDandisetQueryParameterSerializer(data=request.query_params)
         query_serializer.is_valid(raise_exception=True)
@@ -234,8 +234,8 @@ class DandisetViewSet(ReadOnlyModelViewSet):
         else:
             embargo_status = Dandiset.EmbargoStatus.OPEN
 
-        name = serializer.validated_data['name']
-        metadata = serializer.validated_data['metadata']
+        name = req_serializer.validated_data['name']
+        metadata = req_serializer.validated_data['metadata']
         # Strip away any computed fields
         metadata = Version.strip_metadata(metadata)
 
@@ -269,8 +269,8 @@ class DandisetViewSet(ReadOnlyModelViewSet):
         # like the access or repository fields
         metadata = PydanticDandiset.unvalidated(**metadata).json_dict()
 
-        if 'identifier' in serializer.validated_data['metadata']:
-            identifier = serializer.validated_data['metadata']['identifier']
+        if 'identifier' in req_serializer.validated_data['metadata']:
+            identifier = req_serializer.validated_data['metadata']['identifier']
             if identifier and not request.user.is_superuser:
                 return Response(
                     'Creating a dandiset for a given identifier '
@@ -293,7 +293,7 @@ class DandisetViewSet(ReadOnlyModelViewSet):
             # https://stackoverflow.com/questions/25368020/django-deduce-duplicate-key-exception-from-integrityerror
             # https://www.postgresql.org/docs/13/errcodes-appendix.html
             # Postgres error code 23505 == unique_violation
-            if e.__cause__.pgcode == '23505':
+            if e.__cause__.pgcode == '23505':  # type: ignore
                 return Response(f'Dandiset {dandiset.identifier} Already Exists', status=400)
             raise e
 
@@ -316,8 +316,8 @@ class DandisetViewSet(ReadOnlyModelViewSet):
         )
         version.save()
 
-        serializer = DandisetDetailSerializer(instance=dandiset)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        resp_serializer = DandisetDetailSerializer(instance=dandiset)
+        return Response(resp_serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         manual_parameters=[DANDISET_PK_PARAM],
