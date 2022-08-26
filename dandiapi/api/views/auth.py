@@ -3,6 +3,10 @@ from __future__ import annotations
 import json
 from json.decoder import JSONDecodeError
 
+# TODO: Use native `typing` module instead of `typing_extensions` here
+# when we upgrade to Python 3.11 https://www.python.org/dev/peps/pep-0655/#usage-in-python-3-11
+from typing_extensions import TypedDict, Required
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -43,7 +47,12 @@ def auth_token_view(request: Request) -> HttpResponseBase:
     return Response(token.key)
 
 
-QUESTIONS = [
+class Question(TypedDict):
+    question: Required[str]
+    max_length: Required[int]
+
+
+QUESTIONS: list[Question] = [
     {'question': 'First Name', 'max_length': 100},
     {'question': 'Last Name', 'max_length': 100},
     {'question': 'What do you plan to use DANDI for?', 'max_length': 1000},
@@ -60,7 +69,7 @@ COLLECT_USER_NAME_QUESTIONS = QUESTIONS[:2]
 @require_http_methods(['GET'])
 def authorize_view(request: HttpRequest) -> HttpResponse:
     """Override authorization endpoint to handle user questionnaire."""
-    user: User = request.user
+    user = request.user
     if (
         user.is_authenticated
         and not user.is_superuser
@@ -89,7 +98,13 @@ def authorize_view(request: HttpRequest) -> HttpResponse:
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def user_questionnaire_form_view(request: HttpRequest) -> HttpResponse:
-    user: User = request.user
+    # Due to the `IsAuthenticated` permission class, request.user is guarenteed to be
+    # a `User` and *not* be an AnonymousUser. However, DRF doesn't include enough type
+    # info for mypy to infer this.
+    # TODO: remove this assert statement once DRF mypy plugin is working.
+    assert isinstance(request.user, User)
+
+    user = request.user
     if request.method == 'POST':
         user_metadata: UserMetadata = user.metadata
         questionnaire_already_filled_out = user_metadata.questionnaire_form is not None
@@ -98,8 +113,8 @@ def user_questionnaire_form_view(request: HttpRequest) -> HttpResponse:
         # to extract the request data manually
         req_body = request.POST.dict()
         user_metadata.questionnaire_form = {
-            question['question']: req_body.get(question['question'])[: question['max_length']]
-            if req_body.get(question['question']) is not None
+            question['question']: req_body[question['question']][: question['max_length']]
+            if question['question'] in req_body
             else None
             for question in QUESTIONS
         }
@@ -146,7 +161,7 @@ def user_questionnaire_form_view(request: HttpRequest) -> HttpResponse:
 
     try:
         # questions to display in the form
-        questions = json.loads(request.GET.get('QUESTIONS'))
+        questions = json.loads(request.GET.get('QUESTIONS'))  # type: ignore
     except (JSONDecodeError, TypeError):
         raise Http404()
 
