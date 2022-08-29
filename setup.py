@@ -44,7 +44,8 @@ setup(
         'django-admin-display',
         'django-allauth',
         'django-click',
-        'django-configurations[database,email]',
+        # 'django-configurations[database,email]',
+        'django-configurations[database,email] @ git+https://github.com/mvandenburgh/django-configurations@mypy-plugin',  # noqa'
         'django-extensions',
         'django-filter',
         'django-guardian',
@@ -73,8 +74,11 @@ setup(
             'ipython',
             'tox',
             'boto3-stubs[s3]',
-            'django-stubs',
-            'djangorestframework-stubs',
+            # 'django-stubs-ext @ git+https://github.com/typeddjango/django-stubs#subdirectory=django_stubs_ext',  # noqa
+            # 'django-stubs-ext==0.4.0',
+            # 'django-stubs[compatible-mypy] @ git+https://github.com/typeddjango/django-stubs',
+            'django-stubs[compatible-mypy]==1.11.0',
+            'djangorestframework-stubs[compatible-mypy]',
             'types-setuptools',
             'memray',
         ],
