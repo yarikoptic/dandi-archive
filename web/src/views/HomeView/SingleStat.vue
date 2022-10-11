@@ -46,16 +46,11 @@
   </v-container>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'SingleStat',
-  props: {
-    value: { type: String, required: true },
-    name: { type: String, required: true },
-    description: { type: String, default: null, required: false },
-    href: { type: String, default: null, required: false },
-  },
+<script setup lang="ts">
+defineProps({
+  value: { type: String, required: true },
+  name: { type: String, required: true },
+  description: { type: String, default: null, required: false },
+  href: { type: String, default: null, required: false },
 });
 </script>
