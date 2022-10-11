@@ -202,13 +202,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ComputedRef, ref } from 'vue';
+import { computed, ref } from 'vue';
+import type { ComputedRef } from 'vue';
 
 import filesize from 'filesize';
 import moment from 'moment';
 
 import { useDandisetStore } from '@/stores/dandiset';
-import { AccessInformation, DandisetStats, SubjectMatterOfTheDataset } from '@/types';
+import type { AccessInformation, DandisetStats, SubjectMatterOfTheDataset } from '@/types';
 
 import AccessInformationTab from '@/components/DLP/AccessInformationTab.vue';
 import AssetSummaryTab from '@/components/DLP/AssetSummaryTab.vue';
