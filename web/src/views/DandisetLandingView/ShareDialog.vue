@@ -73,44 +73,35 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, ref } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 
 import CopyText from '@/components/CopyText.vue';
 import { useDandisetStore } from '@/stores/dandiset';
 import { dandiUrl } from '@/utils/constants';
 
+defineProps({
+  text: {
+    type: String,
+    default: '',
+  },
+});
+
 // Twitter user to mention
 const twitterUser = 'DANDIarchive';
 
-export default defineComponent({
-  name: 'ShareDialog',
-  components: { CopyText },
-  props: {
-    text: {
-      type: String,
-      default: '',
-    },
-  },
-  setup() {
-    const store = useDandisetStore();
+const store = useDandisetStore();
 
-    const currentDandiset = computed(() => store.dandiset);
-    const currentVersion = computed(() => store.version);
-    const meta = computed(() => currentDandiset.value?.metadata);
-    const permalink = computed(() => {
-      if (currentDandiset.value?.dandiset && currentVersion.value) {
-        return `${dandiUrl}/dandiset/${currentDandiset.value?.dandiset.identifier}/${currentVersion.value}`;
-      }
-      return '';
-    });
-
-    const dialog = ref(false);
-
-    return {
-      dialog, twitterUser, meta, permalink,
-    };
-  },
+const currentDandiset = computed(() => store.dandiset);
+const currentVersion = computed(() => store.version);
+const meta = computed(() => currentDandiset.value?.metadata);
+const permalink = computed(() => {
+  if (currentDandiset.value?.dandiset && currentVersion.value) {
+    return `${dandiUrl}/dandiset/${currentDandiset.value?.dandiset.identifier}/${currentVersion.value}`;
+  }
+  return '';
 });
+
+const dialog = ref(false);
 
 </script>
