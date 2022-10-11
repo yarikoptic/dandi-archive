@@ -78,8 +78,8 @@
   </v-list>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, PropType } from 'vue';
+<script setup lang="ts">
+import { computed, PropType } from 'vue';
 import { useRoute } from 'vue-router/composables';
 import moment from 'moment';
 import filesize from 'filesize';
@@ -87,38 +87,27 @@ import filesize from 'filesize';
 import { Version } from '@/types';
 import { DANDISETS_PER_PAGE } from '@/utils/constants';
 
-export default defineComponent({
-  name: 'DandisetList',
-  props: {
-    dandisets: {
-      type: Array as PropType<Version[]>,
-      required: true,
-    },
-  },
-  setup() {
-    const route = useRoute();
-
-    const origin = computed(() => {
-      const { name, params, query } = route;
-      return { name, params, query };
-    });
-    // current position in search result set = items on prev pages + position on current page
-    function getPos(index: number) {
-      return (Number(route.query.page || 1) - 1) * DANDISETS_PER_PAGE + (index + 1);
-    }
-    function formatDate(date: string) {
-      return moment(date).format('LL');
-    }
-
-    return {
-      origin,
-      formatDate,
-      getPos,
-      // Returned imports
-      filesize,
-    };
+defineProps({
+  dandisets: {
+    type: Array as PropType<Version[]>,
+    required: true,
   },
 });
+
+const route = useRoute();
+
+const origin = computed(() => {
+  const { name, params, query } = route;
+  return { name, params, query };
+});
+// current position in search result set = items on prev pages + position on current page
+function getPos(index: number) {
+  return (Number(route.query.page || 1) - 1) * DANDISETS_PER_PAGE + (index + 1);
+}
+function formatDate(date: string) {
+  return moment(date).format('LL');
+}
+
 </script>
 
 <style scoped>
