@@ -201,10 +201,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import {
-  defineComponent, computed, ComputedRef, ref,
-} from 'vue';
+<script setup lang="ts">
+import { computed, ComputedRef, ref } from 'vue';
 
 import filesize from 'filesize';
 import moment from 'moment';
@@ -255,90 +253,60 @@ const tabs = [
   },
 ];
 
-export default defineComponent({
-  name: 'DandisetMain',
-  components: {
-    ShareDialog,
-    AccessInformationTab,
-    AssetSummaryTab,
-    ContributorsTab,
-    OverviewTab,
-    RelatedResourcesTab,
-    SubjectMatterTab,
-  },
-  props: {
-    schema: {
-      type: Object,
-      required: true,
-    },
-  },
-  setup() {
-    const store = useDandisetStore();
-
-    const currentDandiset = computed(() => store.dandiset);
-
-    const transformFilesize = (size: number) => filesize(size, { round: 1, base: 10, standard: 'iec' });
-
-    const stats: ComputedRef<DandisetStats|null> = computed(() => {
-      if (!currentDandiset.value) {
-        return null;
-      }
-      const { asset_count, size } = currentDandiset.value;
-      return { asset_count, size };
-    });
-
-    // whether or not the "see more" button has been pressed to reveal
-    // the full description
-    const showFullDescription = ref(false);
-    const description: ComputedRef<string> = computed(() => {
-      if (!currentDandiset.value) {
-        return '';
-      }
-      const fullDescription = currentDandiset.value.metadata?.description;
-      if (!fullDescription) {
-        return '';
-      }
-      if (fullDescription.length <= MAX_DESCRIPTION_LENGTH) {
-        return fullDescription;
-      }
-      if (showFullDescription.value) {
-        return currentDandiset.value.metadata?.description || '';
-      }
-      let shortenedDescription = fullDescription.substring(0, MAX_DESCRIPTION_LENGTH);
-      shortenedDescription = `${shortenedDescription.substring(0, shortenedDescription.lastIndexOf(' '))}...`;
-      return shortenedDescription;
-    });
-    const meta = computed(() => currentDandiset.value?.metadata);
-
-    const accessInformation: ComputedRef<AccessInformation|undefined> = computed(
-      () => meta.value?.access,
-    );
-    const subjectMatter: ComputedRef<SubjectMatterOfTheDataset|undefined> = computed(
-      () => meta.value?.about,
-    );
-
-    const currentTab = ref(0);
-
-    function formatDate(date: string): string {
-      return moment(date).format('LL');
-    }
-
-    return {
-      currentDandiset,
-      formatDate,
-      stats,
-      transformFilesize,
-      description,
-      showFullDescription,
-      MAX_DESCRIPTION_LENGTH,
-
-      accessInformation,
-      subjectMatter,
-
-      currentTab,
-      tabs,
-      meta,
-    };
+defineProps({
+  schema: {
+    type: Object,
+    required: true,
   },
 });
+
+const store = useDandisetStore();
+
+const currentDandiset = computed(() => store.dandiset);
+
+const transformFilesize = (size: number) => filesize(size, { round: 1, base: 10, standard: 'iec' });
+
+const stats: ComputedRef<DandisetStats|null> = computed(() => {
+  if (!currentDandiset.value) {
+    return null;
+  }
+  const { asset_count, size } = currentDandiset.value;
+  return { asset_count, size };
+});
+
+// whether or not the "see more" button has been pressed to reveal
+// the full description
+const showFullDescription = ref(false);
+const description: ComputedRef<string> = computed(() => {
+  if (!currentDandiset.value) {
+    return '';
+  }
+  const fullDescription = currentDandiset.value.metadata?.description;
+  if (!fullDescription) {
+    return '';
+  }
+  if (fullDescription.length <= MAX_DESCRIPTION_LENGTH) {
+    return fullDescription;
+  }
+  if (showFullDescription.value) {
+    return currentDandiset.value.metadata?.description || '';
+  }
+  let shortenedDescription = fullDescription.substring(0, MAX_DESCRIPTION_LENGTH);
+  shortenedDescription = `${shortenedDescription.substring(0, shortenedDescription.lastIndexOf(' '))}...`;
+  return shortenedDescription;
+});
+const meta = computed(() => currentDandiset.value?.metadata);
+
+const accessInformation: ComputedRef<AccessInformation|undefined> = computed(
+  () => meta.value?.access,
+);
+const subjectMatter: ComputedRef<SubjectMatterOfTheDataset|undefined> = computed(
+  () => meta.value?.about,
+);
+
+const currentTab = ref(0);
+
+function formatDate(date: string): string {
+  return moment(date).format('LL');
+}
 </script>
