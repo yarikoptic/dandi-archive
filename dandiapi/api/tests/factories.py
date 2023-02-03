@@ -19,6 +19,7 @@ from dandiapi.api.models import (
     UserMetadata,
     Version,
 )
+from dandiapi.api.services.asset import _create_asset
 from dandiapi.api.services.publish import publish_asset
 
 
@@ -185,6 +186,16 @@ class DraftAssetFactory(factory.django.DjangoModelFactory):
 
     path = factory.Faker('file_path', absolute=False, extension='nwb')
     blob = factory.SubFactory(AssetBlobFactory)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        return _create_asset(
+            path=kwargs['path'],
+            asset_blob=kwargs.get('blob', None),
+            embargoed_asset_blob=kwargs.get('embargoed_blob', None),
+            zarr_archive=kwargs.get('zarr', None),
+            metadata=kwargs['metadata'],
+        )
 
     @factory.lazy_attribute
     def metadata(self):
